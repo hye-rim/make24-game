@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>24 만들기</title>
+<style>
+  *, *::before, *::after { -webkit-user-select:none; user-select:none; -webkit-touch-callout:none; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  * { margin:0; padding:0; }
+  html, body { width:100%; height:100%; overflow:hidden; background:#0f2230; color:#fff; font-family:-apple-system, 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; touch-action:manipulation; }
+  #app { position:relative; width:100%; max-width:520px; height:100%; margin:0 auto; display:flex; flex-direction:column; padding:8px 14px 14px; gap:10px; }
+  #top { display:flex; align-items:center; gap:10px; height:36px; flex:none; }
+  #top .t { flex:1; font-size:15px; font-weight:800; color:#cfe8ff; }
+  #top .t b { font-size:20px; color:#fff; }
+  #top .s { font-size:12px; color:#9fc0dc; }
+  #top button { background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.3); color:#fff; width:34px; height:34px; border-radius:8px; font-size:15px; cursor:pointer; }
+  #bar { flex:none; height:10px; border-radius:6px; background:rgba(255,255,255,.12); overflow:hidden; }
+  #bar i { display:block; height:100%; width:100%; background:linear-gradient(90deg,#4cc3ff,#7be08a); transition:width .2s linear; }
+  #bar.low i { background:linear-gradient(90deg,#ff6a7a,#ffb02e); }
+  #msg { flex:none; min-height:26px; text-align:center; font-size:18px; font-weight:900; }
+  #msg.ok { color:#9dff9d; } #msg.bad { color:#ff9a9a; }
+  #goal { flex:none; text-align:center; font-size:13px; color:#9fc0dc; }
+  #goal b { font-size:26px; color:#ffd23a; }
+  #cards { flex:1 1 auto; min-height:0; display:grid; grid-template-columns:1fr 1fr; gap:12px; align-content:center; }
+  .card { position:relative; height:clamp(88px, 17vh, 130px); border-radius:18px; border:3px solid #0a1620; background:linear-gradient(180deg,#fff,#d6e8f8); color:#10243a; display:grid; place-items:center; font-size:44px; font-weight:900; box-shadow:0 6px 0 #0a1620; cursor:pointer; transition:transform .1s; }
+  .card:active { transform:translateY(3px); box-shadow:0 3px 0 #0a1620; }
+  .card.sel { background:linear-gradient(180deg,#fff3a8,#ffd23a); transform:translateY(-3px); }
+  .card.hint { outline:4px solid #7be08a; }
+  .card.pop { animation:pop .25s; }
+  .card .fr { display:flex; flex-direction:column; align-items:center; line-height:1; font-size:34px; }
+  .card .fr i { display:block; width:42px; height:3px; background:#10243a; margin:4px 0; }
+  .card.empty { visibility:hidden; }
+  @keyframes pop { 0% { transform:scale(.7); } 60% { transform:scale(1.12); } 100% { transform:scale(1); } }
+  #ops { flex:none; display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
+  .op { height:64px; border-radius:16px; border:3px solid #0a1620; background:linear-gradient(180deg,#9fe6ff,#4cc3ff); color:#06243a; font-size:36px; font-weight:900; box-shadow:0 5px 0 #0a1620; cursor:pointer; }
+  .op:active { transform:translateY(3px); box-shadow:0 2px 0 #0a1620; }
+  .op.sel { background:linear-gradient(180deg,#fff3a8,#ffd23a); transform:translateY(-3px); }
+  .op.hint { outline:4px solid #7be08a; }
+  #acts { flex:none; display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
+  .act { height:48px; border-radius:14px; border:2.5px solid rgba(255,255,255,.4); background:rgba(255,255,255,.1); color:#fff; font-size:14px; font-weight:800; cursor:pointer; line-height:1.15; }
+  .act small { display:block; font-size:10px; font-weight:600; opacity:.75; }
+  .act:active { background:rgba(255,255,255,.2); }
+  #overlay { position:fixed; inset:0; z-index:6; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; text-align:center; padding:16px; background:rgba(8,16,26,.92); }
+  #overlay.hidden { display:none; }
+  #overlay h1 { font-size:46px; font-weight:900; color:#ffd23a; text-shadow:0 3px 0 #7a4a00; }
+  #overlay h2 { font-size:28px; font-weight:900; }
+  #overlay p { font-size:14px; color:#e6e6e6; line-height:1.6; }
+  #overlay .big { font-size:20px; font-weight:800; color:#ffd23a; }
+  #overlay .help { font-size:12px; color:#bdbdbd; line-height:1.7; }
+  #overlay .note { font-size:11px; color:#9ab; }
+  #overlay button { margin-top:6px; background:linear-gradient(180deg,#fff2b8,#ffc83a); color:#3a2400; font-weight:900; font-size:17px; border:none; border-radius:999px; padding:12px 34px; box-shadow:0 4px 0 #9a6a00; cursor:pointer; }
+  #overlay button:active { transform:translateY(3px); box-shadow:0 1px 0 #9a6a00; }
+  #overlay .lv { display:flex; gap:8px; margin-top:6px; flex-wrap:wrap; justify-content:center; }
+  #overlay .lv button { margin-top:0; padding:9px 14px; font-size:15px; }
+  #overlay .lv small { display:block; font-size:10px; font-weight:600; opacity:.75; margin-top:2px; }
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="top"><span class="t"><b id="solved">0</b> 문제 · <span id="level"></span></span><span class="s" id="best"></span><button id="muteBtn" title="소리 (M)">🔊</button><button id="pauseBtn" title="일시정지 (P)">⏸</button></div>
+  <div id="bar"><i id="barFill"></i></div>
+  <div id="goal">네 숫자로 <b>24</b> 를 만드세요</div>
+  <div id="msg"></div>
+  <div id="cards"></div>
+  <div id="ops">
+    <button class="op" data-op="+" aria-label="더하기">+</button><button class="op" data-op="-" aria-label="빼기">−</button><button class="op" data-op="*" aria-label="곱하기">×</button><button class="op" data-op="/" aria-label="나누기">÷</button>
+  </div>
+  <div id="acts">
+    <button class="act" id="undoBtn">↩ 되돌리기</button><button class="act" id="resetBtn">⟲ 다시</button><button class="act" id="hintBtn">💡 힌트<small id="hintCost"></small></button><button class="act" id="skipBtn">⏭ 건너뛰기<small id="skipCost"></small></button>
+  </div>
+</div>
+<div id="overlay"></div>
+<script src="logic.js"></script>
+<script src="game.js"></script>
+</body>
+</html>
